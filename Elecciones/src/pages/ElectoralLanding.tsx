@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Vote, Shield, Users, BarChart3, CheckCircle, Lock, Menu, X } from 'lucide-react';
+import { Vote, Shield, Users, BarChart3, CheckCircle, Lock, Menu, X, Eye, EyeOff, AlertCircle, User } from 'lucide-react';
 
 export default function ElectoralLanding() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showVoteModal, setShowVoteModal] = useState(false);
     const [showBallotModal, setShowBallotModal] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false); // NUEVO
     const [activeTab, setActiveTab] = useState<'presidencial' | 'regional' | 'distrital'>('presidencial');
     const [formData, setFormData] = useState({
         nombre: '',
@@ -19,6 +20,15 @@ export default function ElectoralLanding() {
         distrital: ''
     });
 
+    // NUEVO: Estado para el login
+    const [showPassword, setShowPassword] = useState(false);
+    const [loginData, setLoginData] = useState({
+        username: '',
+        password: ''
+    });
+    const [loginError, setLoginError] = useState('');
+    const [loginLoading, setLoginLoading] = useState(false);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
@@ -26,12 +36,39 @@ export default function ElectoralLanding() {
         });
     };
 
+    // NUEVO: Handler para el login
+    const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLoginData({
+            ...loginData,
+            [e.target.name]: e.target.value
+        });
+        setLoginError('');
+    };
+
+    // NUEVO: Handler para submit del login
+    const handleLoginSubmit = () => {
+        setLoginLoading(true);
+        setLoginError('');
+
+        setTimeout(() => {
+            if (loginData.username === 'admin' && loginData.password === 'admin123') {
+                alert('¡Login exitoso! Redirigiendo al panel de administración...');
+                setShowLoginModal(false);
+                setLoginData({ username: '', password: '' });
+                // Aquí redirigirías al dashboard
+            } else {
+                setLoginError('Usuario o contraseña incorrectos');
+            }
+            setLoginLoading(false);
+        }, 1000);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Datos del votante verificados:', formData);
         setShowVoteModal(false);
         setShowBallotModal(true);
-        setVotes({ presidencial: '', regional: '', distrital: '' }); // Reiniciar voto
+        setVotes({ presidencial: '', regional: '', distrital: '' });
         setActiveTab('presidencial');
     };
 
@@ -54,16 +91,14 @@ export default function ElectoralLanding() {
                             } ${disabled ? 'cursor-not-allowed' : ''}`}
                         onClick={(e) => {
                             if (disabled) return;
-                            // Esto permite deseleccionar al hacer click en el mismo
                             if (selected === candidato.id) {
-                                onSelect(''); // Deselecciona
+                                onSelect('');
                             } else {
                                 onSelect(candidato.id);
                             }
                             e.preventDefault();
                         }}
                     >
-                        {/* Input oculto solo para accesibilidad */}
                         <input
                             type="checkbox"
                             checked={selected === candidato.id}
@@ -82,40 +117,7 @@ export default function ElectoralLanding() {
                         )}
                     </label>
                 ))}
-
-                {/* Voto en Blanco - TAMBIÉN deseleccionable */}
-                <label
-                    className={`relative block cursor-pointer rounded-2xl overflow-hidden border-4 transition-all duration-300 transform hover:scale-105 ${selected === 'blanco'
-                        ? 'border-green-400 shadow-2xl shadow-green-500/30 ring-4 ring-green-400/50'
-                        : 'border-blue-700 hover:border-blue-500'
-                        } ${disabled ? 'cursor-not-allowed' : ''}`}
-                    onClick={(e) => {
-                        if (disabled) return;
-                        if (selected === 'blanco') {
-                            onSelect('');
-                        } else {
-                            onSelect('blanco');
-                        }
-                        e.preventDefault();
-                    }}
-                >
-                    <input
-                        type="checkbox"
-                        checked={selected === 'blanco'}
-                        onChange={() => { }}
-                        className="sr-only"
-                    />
-                    <div className="bg-gradient-to-b from-gray-800 to-gray-900 p-6 flex items-center justify-center h-full min-h-80">
-                        <div className="text-center">
-                            <div className="w-28 h-28 mx-auto mb-4 bg-gray-700 rounded-full flex items-center justify-center border-4 border-gray-600">
-                                <X className="w-14 h-14 text-gray-500" />
-                            </div>
-                            <h4 className="text-2xl font-bold text-gray-400">Voto en Blanco</h4>
-                            <p className="text-gray-500 text-sm mt-2">No elijo a ningún candidato</p>
-                        </div>
-                    </div>
-                </label>
-            </div>.
+            </div>
         </div>
     );
 
@@ -170,11 +172,12 @@ export default function ElectoralLanding() {
                         </div>
 
                         <div className="hidden md:flex space-x-4">
-                            <button className="px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-800 transition">
+                            {/* BOTÓN ACTUALIZADO */}
+                            <button 
+                                onClick={() => setShowLoginModal(true)}
+                                className="px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-800 transition"
+                            >
                                 Iniciar Sesión
-                            </button>
-                            <button className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 transition">
-                                Comenzar
                             </button>
                         </div>
 
@@ -190,7 +193,10 @@ export default function ElectoralLanding() {
                             <a href="#seguridad" className="block hover:text-blue-300 transition">Seguridad</a>
                             <a href="#contacto" className="block hover:text-blue-300 transition">Contacto</a>
                             <div className="flex flex-col space-y-2 pt-4">
-                                <button className="px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-800 transition">
+                                <button 
+                                    onClick={() => setShowLoginModal(true)}
+                                    className="px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-800 transition"
+                                >
                                     Iniciar Sesión
                                 </button>
                                 <button className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 transition">
@@ -324,6 +330,136 @@ export default function ElectoralLanding() {
                 </div>
             </section>
 
+            {/* NUEVO: Modal de Login de Administrador */}
+            {showLoginModal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-800/95 rounded-2xl border border-slate-700 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 border-b border-blue-500">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-2xl font-bold flex items-center gap-2">
+                                        <Shield className="w-7 h-7 text-blue-200" />
+                                        Panel de Administración
+                                    </h3>
+                                    <p className="text-blue-200 text-sm mt-1">Acceso Seguro</p>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        setShowLoginModal(false);
+                                        setLoginData({ username: '', password: '' });
+                                        setLoginError('');
+                                    }}
+                                    className="text-blue-200 hover:text-white transition"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Form */}
+                        <div className="p-6 space-y-5">
+                            {/* Error Message */}
+                            {loginError && (
+                                <div className="bg-red-500/20 border border-red-500 rounded-lg p-3 flex items-start gap-3">
+                                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                    <p className="text-red-200 text-sm">{loginError}</p>
+                                </div>
+                            )}
+
+                            {/* Usuario */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Usuario</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <User className="w-5 h-5 text-slate-500" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={loginData.username}
+                                        onChange={handleLoginChange}
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Ingresa tu usuario"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Contraseña */}
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Contraseña</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <Lock className="w-5 h-5 text-slate-500" />
+                                    </div>
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        name="password"
+                                        value={loginData.password}
+                                        onChange={handleLoginChange}
+                                        className="w-full pl-10 pr-10 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Ingresa tu contraseña"
+                                    />
+                                    <button
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Info de seguridad */}
+                            <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3 flex items-start gap-2">
+                                <Shield className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                                <p className="text-xs text-blue-200">
+                                    Tu sesión está protegida con encriptación de extremo a extremo.
+                                </p>
+                            </div>
+
+                            {/* Credenciales demo */}
+                            <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-3">
+                                <p className="text-xs text-yellow-200 text-center">
+                                    Demo: <strong>admin</strong> / <strong>admin123</strong>
+                                </p>
+                            </div>
+
+                            {/* Botones */}
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => {
+                                        setShowLoginModal(false);
+                                        setLoginData({ username: '', password: '' });
+                                        setLoginError('');
+                                    }}
+                                    className="flex-1 px-6 py-3 border border-slate-600 rounded-lg hover:bg-slate-700 transition"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={handleLoginSubmit}
+                                    disabled={loginLoading || !loginData.username || !loginData.password}
+                                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition ${
+                                        loginLoading || !loginData.username || !loginData.password
+                                            ? 'bg-slate-600 cursor-not-allowed opacity-60'
+                                            : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700'
+                                    }`}
+                                >
+                                    {loginLoading ? (
+                                        <div className="flex items-center justify-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            Verificando...
+                                        </div>
+                                    ) : (
+                                        'Iniciar Sesión'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modal de Registro */}
             {showVoteModal && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -338,12 +474,11 @@ export default function ElectoralLanding() {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            {/* Campos del formulario (sin cambios) */}
-                            <div><label className="block text-sm font-medium text-blue-200 mb-2">Nombre *</label><input type="text" name="nombre" value={formData.nombre} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="Ingresa tu nombre" /></div>
-                            <div><label className="block text-sm font-medium text-blue-200 mb-2">Apellido *</label><input type="text" name="apellido" value={formData.apellido} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="Ingresa tu apellido" /></div>
-                            <div><label className="block text-sm font-medium text-blue-200 mb-2">DNI *</label><input type="text" name="dni" value={formData.dni} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="Ingresa tu DNI" /></div>
-                            <div><label className="block text-sm font-medium text-blue-200 mb-2">Email *</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="tu@email.com" /></div>
+                        <div className="p-6 space-y-4">
+                            <div><label className="block text-sm font-medium text-blue-200 mb-2">Nombre *</label><input type="text" name="nombre" value={formData.nombre} onChange={handleInputChange} className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="Ingresa tu nombre" /></div>
+                            <div><label className="block text-sm font-medium text-blue-200 mb-2">Apellido *</label><input type="text" name="apellido" value={formData.apellido} onChange={handleInputChange} className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="Ingresa tu apellido" /></div>
+                            <div><label className="block text-sm font-medium text-blue-200 mb-2">DNI *</label><input type="text" name="dni" value={formData.dni} onChange={handleInputChange} className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="Ingresa tu DNI" /></div>
+                            <div><label className="block text-sm font-medium text-blue-200 mb-2">Email *</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="tu@email.com" /></div>
                             <div><label className="block text-sm font-medium text-blue-200 mb-2">Teléfono</label><input type="tel" name="telefono" value={formData.telefono} onChange={handleInputChange} className="w-full px-4 py-3 bg-blue-900/50 border border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-400" placeholder="+51 999 999 999" /></div>
 
                             <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 flex items-start gap-3">
@@ -355,18 +490,17 @@ export default function ElectoralLanding() {
 
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setShowVoteModal(false)} className="flex-1 px-6 py-3 border border-blue-600 rounded-lg hover:bg-blue-900 transition">Cancelar</button>
-                                <button type="submit" className="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition">Continuar</button>
+                                <button onClick={handleSubmit} className="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition">Continuar</button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* MODAL DE BOLETA ELECTORAL - FINAL: Deseleccionar + Desbloquear pestañas */}
+            {/* Modal de Boleta Electoral */}
             {showBallotModal && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
                     <div className="bg-blue-950 rounded-3xl border border-blue-700 max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl flex flex-col">
-                        {/* Header */}
                         <div className="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 border-b border-blue-600 flex-shrink-0">
                             <div className="flex justify-between items-start">
                                 <div className="max-w-2xl">
@@ -394,7 +528,6 @@ export default function ElectoralLanding() {
                             </div>
                         </div>
 
-                        {/* Tabs - Se desbloquean si no hay voto */}
                         <div className="flex border-b border-blue-800 bg-blue-900/50 flex-shrink-0">
                             {(['presidencial', 'regional', 'distrital'] as const).map((tab) => {
                                 const hasVote = Object.values(votes).some(Boolean);
@@ -424,7 +557,6 @@ export default function ElectoralLanding() {
                             })}
                         </div>
 
-                        {/* Mensaje de voto */}
                         {Object.values(votes).some(Boolean) && (
                             <div className="bg-green-900/40 border-y border-green-700 p-3 text-center flex-shrink-0">
                                 <p className="text-green-300 font-bold text-sm md:text-base">
@@ -440,7 +572,6 @@ export default function ElectoralLanding() {
                             </div>
                         )}
 
-                        {/* Contenido */}
                         <div className="flex-1 overflow-y-auto p-6 md:p-8">
                             {activeTab === 'presidencial' && (
                                 <CandidateSection
@@ -489,7 +620,6 @@ export default function ElectoralLanding() {
                             )}
                         </div>
 
-                        {/* FOOTER FIJO - Siempre visible */}
                         <div className="p-5 md:p-6 bg-blue-900/90 border-t-2 border-blue-700 flex-shrink-0">
                             <div className="flex items-center justify-center gap-4 mb-4">
                                 <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-3xl font-bold transition-all duration-300 shadow-xl ${Object.values(votes).some(Boolean)
