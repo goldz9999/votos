@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Vote, Shield, Users, BarChart3, CheckCircle, Lock, Menu, X, Eye, EyeOff, AlertCircle, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ElectoralLanding() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,16 +47,20 @@ export default function ElectoralLanding() {
     };
 
     // NUEVO: Handler para submit del login
+    const navigate = useNavigate();
+
     const handleLoginSubmit = () => {
         setLoginLoading(true);
         setLoginError('');
 
         setTimeout(() => {
             if (loginData.username === 'admin' && loginData.password === 'admin123') {
-                alert('¡Login exitoso! Redirigiendo al panel de administración...');
+                localStorage.setItem('adminAuth', 'true'); // ACTIVA LA PROTECCIÓN
+
                 setShowLoginModal(false);
                 setLoginData({ username: '', password: '' });
-                // Aquí redirigirías al dashboard
+
+                navigate('/admin/dashboard'); // REDIRECCIÓN PERFECTA
             } else {
                 setLoginError('Usuario o contraseña incorrectos');
             }
@@ -173,8 +178,8 @@ export default function ElectoralLanding() {
 
                         <div className="hidden md:flex space-x-4">
                             {/* BOTÓN ACTUALIZADO */}
-                            <button 
-                                onClick={() => setShowLoginModal(true)}
+                            <button
+                                onClick={() => window.location.href = '/admin/login'}  // ✅ Redirige al login real
                                 className="px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-800 transition"
                             >
                                 Iniciar Sesión
@@ -193,7 +198,7 @@ export default function ElectoralLanding() {
                             <a href="#seguridad" className="block hover:text-blue-300 transition">Seguridad</a>
                             <a href="#contacto" className="block hover:text-blue-300 transition">Contacto</a>
                             <div className="flex flex-col space-y-2 pt-4">
-                                <button 
+                                <button
                                     onClick={() => setShowLoginModal(true)}
                                     className="px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-800 transition"
                                 >
@@ -344,7 +349,7 @@ export default function ElectoralLanding() {
                                     </h3>
                                     <p className="text-blue-200 text-sm mt-1">Acceso Seguro</p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => {
                                         setShowLoginModal(false);
                                         setLoginData({ username: '', password: '' });
@@ -439,11 +444,10 @@ export default function ElectoralLanding() {
                                 <button
                                     onClick={handleLoginSubmit}
                                     disabled={loginLoading || !loginData.username || !loginData.password}
-                                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition ${
-                                        loginLoading || !loginData.username || !loginData.password
-                                            ? 'bg-slate-600 cursor-not-allowed opacity-60'
-                                            : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700'
-                                    }`}
+                                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition ${loginLoading || !loginData.username || !loginData.password
+                                        ? 'bg-slate-600 cursor-not-allowed opacity-60'
+                                        : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700'
+                                        }`}
                                 >
                                     {loginLoading ? (
                                         <div className="flex items-center justify-center gap-2">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminLogin() {
     const [showPassword, setShowPassword] = useState(false);
@@ -18,19 +19,22 @@ export default function AdminLogin() {
         setError('');
     };
 
+    const navigate = useNavigate();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Simulación de autenticación (reemplazar con lógica real)
+        // Simulación de autenticación
         setTimeout(() => {
             if (formData.username === 'admin' && formData.password === 'admin123') {
-                // Login exitoso
+                // GUARDAR AUTENTICACIÓN
                 localStorage.setItem('adminAuth', 'true');
                 localStorage.setItem('adminUser', formData.username);
-                alert('¡Login exitoso! Redirigiendo al panel de administración...');
-                // Aquí redirigirías al dashboard: window.location.href = '/admin/dashboard';
+
+                // REDIRECCIÓN CORRECTA
+                navigate('/admin/dashboard');
             } else {
                 setError('Usuario o contraseña incorrectos');
             }
@@ -150,8 +154,8 @@ export default function AdminLogin() {
                             type="submit"
                             disabled={loading}
                             className={`w-full py-3 rounded-xl font-semibold text-white transition transform ${loading
-                                    ? 'bg-slate-600 cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/30'
+                                ? 'bg-slate-600 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/30'
                                 }`}
                         >
                             {loading ? (
